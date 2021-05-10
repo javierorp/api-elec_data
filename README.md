@@ -13,9 +13,9 @@ Desarrollo de un script para importar datos CSV a una base de datos y de una API
          * [/ (Swagger)](#-swagger)
          * [/apielec/ping](#apielecping)
          * [/apielec/getData](#apielecgetdata)
-         * [apielec/getDataById](#apielecgetdatabyid)
-         * [apielec/getDataByDate](#apielecgetdatabydate)
-         * [apielec/getDataByRange](#apielecgetdatabyrange)
+         * [/apielec/getDataById](#apielecgetdatabyid)
+         * [/apielec/getDataByDate](#apielecgetdatabydate)
+         * [/apielec/getDataByRange](#apielecgetdatabyrange)
       * [test.py](#testpy)
       * [Solución de problemas](#solución-de-problemas)
          * [PyJWT y Werkzeug](#pyjwt-y-werkzeug)
@@ -292,7 +292,7 @@ obteniendo la respuesta:
 }
 ```
 
-### apielec/getDataById
+### /apielec/getDataById
 
 | Parámetros | Tipo   | Descripción                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
