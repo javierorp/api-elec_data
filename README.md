@@ -2,7 +2,23 @@
 
 **Autor:** Javier Orti Priego (javierorp)
 
-Desarrollo de un script para importar datos CSV a una base de datos y de una API que permita el acceso a dichos datos. La API está segurizada y guarda las peticiones en memoria caché durante 10 min. Se incluyen test que verifican el correcto acceso a la base de datos con los datos importados y del funcionamiento de la API.
+Desarrollo de un script para importar datos CSV a una base de datos y de una API REST (hecha con Flask y Flask-RESTPlus) que permita el acceso a dichos datos. La API está segurizada y guarda las peticiones en memoria caché durante 10 min. Se incluyen test que verifican el correcto acceso a la base de datos con los datos importados y del funcionamiento de la API.
+
+   * [Índice](#api-datos-eléctricos)
+      * [Requisitos](#requisitos)
+      * [Ficheros disponibles](#ficheros-disponibles)
+      * [import_CSV_to_mysql.py](#import_csv_to_mysql.py)
+      * [api.py](#api.py)
+         * [/login](#/login)
+         * [/ (Swagger)](#/-(swagger))
+         * [/apielec/ping](#/apielec/ping)
+         * [/apielec/getData](#/apielec/getdata)
+         * [apielec/getDataById](#apielec/getdatabyid)
+         * [apielec/getDataByDate](#apielec/getdatabydate)
+         * [apielec/getDataByRange](#apielec/getdatabyrange)
+      * [test.py](#test.py)
+      * [Solución de problemas](#solución-de-problemas)
+         * [PyJWT y Werkzeug](#pyjwt-y-werkzeug)
 
 ## Requisitos
 
@@ -19,13 +35,13 @@ Desarrollo de un script para importar datos CSV a una base de datos y de una API
 Para instalar los paquetes puede utilizar el fichero *requirements.txt*:
 
 ```powershell
-PS> pip install -r requirements.txt
+PS > pip install -r requirements.txt
 ```
 
 o si se quiere instalar en un entorno virtual:
 
 ```powershell
-PS> pipenv install -r requirements.txt
+PS > pipenv install -r requirements.txt
 ```
 
 Lo aquí descrito ha sido probado y desarrollado en Windows 10 Home (versión 20H2, compilación 19042.964).
@@ -489,5 +505,19 @@ PS > python test.py
 Ran 8 tests in 0.246s
 
 OK
+```
+
+## Solución de problemas
+
+### PyJWT y Werkzeug
+
+Si la API no permite generar tokens de forma correcta o le es imposible generarlo puede deberse a que la versión del paquete Werkzeug sea incompatible con la versión de PyJWT instalada. Para solucionarlo hay que intalar las versiones que se nombran en los requisitos, es decir, la 0.16.1 para Werkzeug y la 2.1.0 para PyJWT.
+
+```powershell
+PS > pip unistall werkzeug
+PS > pip install werkzeug==0.16.1
+
+PS > pip unistall pyjwt
+PS > pip install pyjwr==2.1.0
 ```
 
