@@ -1,12 +1,14 @@
-# API Datos eléctricos
+# API Electricity data
 
-**Autor:** Javier Orti Priego (javierorp)
+**Author:** Javier Orti Priego ([javierorp](https://www.linkedin.com/in/javierortipriego/))
 
-Desarrollo de un script para importar datos CSV a una base de datos y de una API REST (hecha con Flask y Flask-RESTPlus) que permita el acceso a dichos datos. La API está segurizada y guarda las peticiones en memoria caché durante 10 min. Se incluyen test que verifican el correcto acceso a la base de datos con los datos importados y del funcionamiento de la API.
+A Spanish version of this document is available [here](https://github.com/javierorp/api-elec_data/blob/main/README_es.md).
 
-   * [Índice](#api-datos-eléctricos)
-      * [Requisitos](#requisitos)
-      * [Ficheros disponibles](#ficheros-disponibles)
+Development of a script to import CSV data into a database and a REST API (made with Flask and Flask-RESTPlus) that allows access to this data. The API is secured and saves requests in cache memory for 10 min. Tests are included to verify the correct access to the database with the imported data and the operation of the API.
+
+   * [Index](#api-electricity-data)
+      * [Requirements](#requirements)
+      * [Available files](#available-files)
       * [import_CSV_to_mysql.py](#import_csv_to_mysqlpy)
       * [api.py](#apipy)
          * [/login](#login)
@@ -17,14 +19,14 @@ Desarrollo de un script para importar datos CSV a una base de datos y de una API
          * [/apielec/getDataByDate](#apielecgetdatabydate)
          * [/apielec/getDataByRange](#apielecgetdatabyrange)
       * [test.py](#testpy)
-      * [Solución de problemas](#solución-de-problemas)
-         * [PyJWT y Werkzeug](#pyjwt-y-werkzeug)
+      * [Troubleshooting](#troubleshooting)
+         * [PyJWT and Werkzeug](#pyjwt-and-werkzeug)
 
-## Requisitos
+## Requirements
 
-- MySQL Community Server 8.0.24
-- Python 3.9.5
-- Paquetes de Python necesarios
+- [MySQL Community Server 8.0.24](https://downloads.mysql.com/archives/installer/)
+- [Python 3.9.5](https://www.python.org/downloads/release/python-395/)
+- Required Python packages:
   - mysql-connector-python==8.0.24
   - Flask==1.1.2
   - Flask-Caching==1.10.1
@@ -32,41 +34,41 @@ Desarrollo de un script para importar datos CSV a una base de datos y de una API
   - Werkzeug==0.16.1
   - PyJWT==2.1.0
 
-Para instalar los paquetes puede utilizar el fichero *requirements.txt*:
+You can use the *requirements.txt* file to install the packages:
 
 ```powershell
 PS > pip install -r requirements.txt
 ```
 
-o si se quiere instalar en un entorno virtual:
+or if you want to install it in a virtual environment:
 
 ```powershell
 PS > pipenv install -r requirements.txt
 ```
 
-Lo aquí descrito ha sido probado y desarrollado en Windows 10 Home (versión 20H2, compilación 19042.964).
+What is described here has been tested and developed on Windows 10 Home (version 20H2, build 19042.964).
 
-## Ficheros disponibles
+## Available files
 
-- **requirements.txt:** contiene los paquetes de python necesarios para importar los datos y ejecutar la API.
-- **Monitoring_report.csv:** contiene los datos a importar a la base de datos y de los que hará uso la API.
-- **import_CSV_to_mysql.py:** script para importar los datos del fichero CSV *Monitoring_report.csv* que deberá pasarse como argumento. Crea la base de datos, tablas y usuario necesarios para hacer uso de la API.
-- **api.py:** levanta la API para que pueda hacerse uso de ella en el puerto 5.000. Tiene habilitado el modo *debug*.
-- **test.py**: contiene 8 test unitarios que comprueban tanto si la base de datos está creada correctamente como si la API responde como debe.
+- **requirements.txt:** it contains the python packages needed to import the data and run the API.
+- **Monitoring_report.csv:** it contains the data to be imported into the database and used by the API.
+- **import_CSV_to_mysql.py:** script to import the data from the CSV file *Monitoring_report.csv* to be passed as an argument. Create the database, tables and user needed to make use of the API.
+- **api.py:** raises the API so that it can be used on port 5000. It has debug mode enabled.
+- **test.py**: it contains 8 unit tests that check both if the database is created correctly and if the API responds as it should.
 
 ## import_CSV_to_mysql.py
 
-Este script importa los datos de *Monitoring_report.csv*, para lo que crea una base de datos llamada *elecprod* y una tabla *consumpdata*, donde serán volcados los datos. Además, crea un una tabla de usuarios *users*, que serán los usuarios que pueden acceder a la API, un trigger para que todas las contraseñas no se almacenen en texto plano, sino que se almacene el hash SHA1 256 que producen, e inserta en dicha tabla un usuario *rick* con contraseña *morty*. Por último, para acceder a la base de datos y porder hacer consultas, crea un usuario de solo consulta (solo puede realizar *select*) sobre la base de datos *elecprod*, con nombre *blue* y contraseña *blue21*, en la máquina local.
+This script imports the data from *Monitoring_report.csv*, for which it creates a database called *elecprod* and a table *consumpdata*, where the data will be dumped. It also creates a table of users, named as *users*, which will be the users that can access the API, a trigger so that all the passwords are not stored in plain text, but the SHA1 256 hash they produce is stored, and inserts a *rick* user with a *morty* password in this table. Finally, to access the database and be able to make queries, create a read-only user (it can only make *select*) on *elecprod* database, with name *blue* and password *blue21*, on the local machine.
 
-A la base de datos local para llevar a cabo todo lo descrito se accede con usuario *root* y contraseña *admin*, por lo que si difieren se deben cambiar en el script (variables *db_user* y *db_pass*).
+The local database is accessed with *root* user and *admin* password, so if they are different, they must be changed in the script (*db_user* and *db_pass* variables).
 
-Las instrucciones SQL que ejecuta el script son las siguientes:
+The SQL statements executed by this script are as follows:
 
 ```sql
--- Creación de la base de datos
+-- Database creation
 CREATE DATABASE IF NOT EXISTS elecprod DEFAULT CHARACTER SET 'utf8';
 
--- Creación de la tabla
+-- Table creation
 CREATE TABLE IF NOT EXISTS elecprod.consumpdata (
     id INT NOT NULL AUTO_INCREMENT COMMENT 'Row id',
     date DATETIME NOT NULL COMMENT 'Date of consumption',
@@ -81,7 +83,7 @@ CREATE TABLE IF NOT EXISTS elecprod.consumpdata (
     PRIMARY KEY (id)
 );
 
--- Creación de la tabla con los usuarios que pueden acceder a la API
+-- Creation of the table with the users who can access the API
 CREATE TABLE IF NOT EXISTS elecprod.users (
     id INT NOT NULL AUTO_INCREMENT COMMENT 'Row id',
     user CHAR(10) COMMENT 'Authorized user',
@@ -90,26 +92,26 @@ CREATE TABLE IF NOT EXISTS elecprod.users (
     UNIQUE KEY (user)
 );
 
--- Eliminación el trigger si ya existe
+-- Deletion of the trigger if it already exists
 DROP TRIGGER IF EXISTS elecprod.encpassword;
 
--- Creación del trigger que encripta las contraseñas
+-- Creation of the trigger that encrypts passwords
 CREATE 
     TRIGGER  encpassword
  BEFORE INSERT ON elecprod.users FOR EACH ROW 
     SET NEW . password = SHA2(NEW.password, 256);
 
--- Creación del usuario de acceso a la API
+-- Creation of the API access user
 INSERT INTO elecprod.users(user, password)VALUES('rick', 'morty');
 
--- Creación del usuario de solo consulta a la DB y asignación de permisos
+-- Creation of the DB read-only user and permissions assignment
 CREATE USER IF NOT EXISTS 'blue'@'localhost' IDENTIFIED BY 'blue21';
 GRANT SELECT, SHOW VIEW ON elecprod.* TO 'blue'@'localhost';
 ```
 
-Como se puede ver en el código de creación de la tabla *consumpdata*, se incluye un id auto incremental que actúa como clave primaria, al igual que en la tabla *users*, donde, además del id que es clave primaria, se incluye el campo *user* como clave única, de forma que no pueda haber dos usuarios con el mismo nombre.
+As you can see in the creation code of the *consumpdata* table, an auto incremental id is included that acts as a primary key, as in the *users* table, where, in addition to the id that is the primary key, the *user* field is included as a unique key, so that there cannot be two users with the same name.
 
-Ejecución del script:
+Script execution:
 
 ```powershell
 PS > python import_CSV_to_mysql.py Monitoring_report.csv
@@ -126,11 +128,11 @@ OK - CSV (11716 lines) successfully imported to elecprod.consumpdata
 
 ## api.py
 
-Es una API REST hecha con Flask y Flask-RESTPlus, está segurizada y tiene un caché de 10 minutos. La elección de hacer una API REST es por la facilidad de uso ya que, independientemente del lenguaje de programación que se utilice, se puede acceder a ella al solo hacer falta peticiones POST y GET.
+It is a REST API made with Flask and Flask-RESTPlus, it is secured and has a cache of 10 minutes. The choice of making a REST API is for ease of use because, regardless of the programming language used, it can be accessed by only POST and GET requests.
 
-Flask es un framework minimalista de Python para crear aplicaciones webs muy sencillo de implementar, que consume pocos recursos y de uso libre. Flask-RESTPlus es una extensión de Flask para construir APIs y que permite implementar Swagger. La función principal de esta API es el acceso a la información contenida en la tabla *consumpdata* de la base de datos *elecprod*.
+Flask is a minimalist Python framework for creating web applications that is easy to implement, resource-efficient and free to use. Flask-RESTPlus is an extension of Flask to build APIs and to implement Swagger. The main function of this API is to access the information contained in the *consumpdata* table of the *elecprod* database.
 
-Para ejecutar la api:
+To run the api:
 
 ```powershell
 PS> python api.py
@@ -148,9 +150,9 @@ PS> python api.py
 
 ```
 
-La API, como se ve en la última línea, se encuentra corriendo en nuestra máquina (127.0.0.1) en el puerto 5.000. Antes de estar disponible, se comprueba que puede acceder a la base de datos y obtiene de ella las columnas de la tabla *consumpdata*, que serán utilizadas en la respuesta a las peticiones.
+The API, as shown in the last line, is running on our machine (127.0.0.1) on port 5000. Before being available, it checks that it can access the database and obtains from it the columns of the *consumpdata* table, which will be used in the request responses.
 
-Las direcciones disponibles son las siguientes:
+The following addresses are available:
 
 ```json
 /
@@ -163,15 +165,15 @@ Las direcciones disponibles son las siguientes:
 	|-getDataByRange
 ```
 
-Excepto "login", todas las funcionales cuelgan de "apielec". Del mismo modo, todas permiten peticiones GET excepto "login" (aunque lo permite de prueba).
+With the exception of "login", all the functions depend on "apielec". Similarly, all of them allow GET requests except "login" (although it allows it on a test version).
 
 ### /login
 
-Para poder acceder a la API es necesario obtener un token que se usará como API Key. Para ello, debemos hacer una petición POST a la dirección http://127.0.0.1:5000/login con autorización de tipo "Basic Auth", usuario "rick" y contraseña "morty".
+In order to access the API it is necessary to obtain a token that will be used as API Key. To do this, we need to make a POST request to the address http://127.0.0.1:5000/login with authorization type "Basic Auth", user "rick" and password "morty".
 
-Aunque en un entorno real las peticiones se realizarían directamente desde otra aplicación, para probarla desde el navegador, si no se quiere utilizar aplicaciones para realizar peticiones como Postman, se ha permitido las peticiones GET, lo que implica que en el navegador se abrirá una ventana emergente solicitando el usuario y contraseña.
+Although in a real environment the requests would be made directly from another application, to test it from the browser, if you do not want to use applications to make requests such as Postman, GET requests are allowed, which means that the browser will open a pop-up window requesting the user and password.
 
-Si la petición es inválida devolverá:
+If the request is invalid it will return:
 
 ```json
 {
@@ -181,7 +183,7 @@ Si la petición es inválida devolverá:
 }
 ```
 
-Y si es correcta:
+And whether it is correct:
 
 ```json
 {
@@ -192,15 +194,15 @@ Y si es correcta:
 }
 ```
 
-El token obtenido será el que deba utilizarse para las peticiones a la API, donde **las autorizaciones deberán ser de tipo "API KEY", con clave (*key*) "SESSION", valor (*value*) el token obtenido y añadidas a la cabecera (*header*) de la petición**. Una vez se accede a la API con el token obtenido, esta la guarda indefinidamente en memoria hasta que la API sea reiniciada.
+The token obtained will be the one to be used for requests to the API, where **authorisations should be of type "API KEY", with key "SESSION", value the token obtained and added to the header of the request**. Once the API is accessed with the obtained token, it is stored indefinitely in memory until the API is restarted.
 
 ### / (Swagger)
 
-En el directorio principal de la API podemos ver la documentación. Así, accediendo a la dirección http://127.0.0.1:5000/ desde nuestro navegador se muestran todas peticiones accesibles de la API, con una pequeña descripción de cada una de ellas, los parámetros que aceptan y las respuestas que devuelven.
+In the main directory of the API we can see the documentation. Thus, accessing the address http://127.0.0.1:5000/ from our browser shows all accessible API requests, with a short description of each one of them, the parameters they accept and the responses they return.
 
-Como la API está segurizada, aunque se pueda ver la documentación, no se pueden realizar peticiones. Para permitir hacer peticiones, debemos pulsar en "Authorize" (arriba a la derecha) e introducir nuestro token. Con ello, ya podríamos lazar peticiones directamente desde Swagger.
+As the API is secured, although you can see the documentation, you cannot make requests. To allow requests to be sent, we need to click on "Authorize" (top right) and enter our token. With this, we could then launch requests directly from Swagger.
 
-Si realizamos peticiones sin autenticarnos obtendremos:
+If we make requests without authentication we will get:
 
 ```json
 {
@@ -209,7 +211,7 @@ Si realizamos peticiones sin autenticarnos obtendremos:
 }
 ```
 
-Si, por el contrario, el token es erróneo obtendremos:
+On the opposite, if the token is wrong, we will get:
 
 ```json
 {
@@ -220,7 +222,7 @@ Si, por el contrario, el token es erróneo obtendremos:
 
 ### /apielec/ping
 
-Solo sirve para comprobar que la API está accesible y ejecutándose correctamente. Haciendo una petición GET a la dirección http://127.0.0.1:5000/apielec/ping correctamente autenticado, se obtiene la siguiente respuesta:
+It only checks if the API is accessible and running correctly. Making a GET request to the address http://127.0.0.1:5000/apielec/ping correctly authenticated, the following response is obtained:
 
 ```json
 {
@@ -236,23 +238,23 @@ Solo sirve para comprobar que la API está accesible y ejecutándose correctamen
 
 ### /apielec/getData
 
-| Parámetros | Tipo | Descripción |
+| Parameters | Type | Description |
 | ---------- | ---- | ----------- |
 | -          | -    | -           |
 
-| Respuesta (código) | Descripción                            |
-| ------------------ | -------------------------------------- |
-| 200                | OK                                     |
-| 405                | Token is missing (token no encontrado) |
-| 406                | Invalid token (token no válido)        |
+| Response (code) | Description      |
+| --------------- | ---------------- |
+| 200             | OK               |
+| 405             | Token is missing |
+| 406             | Invalid token    |
 
-Obtiene todos los datos que se encuentran disponibles en la base de datos. Por lo que al realizar una petición GET a la dirección http://127.0.0.1:5000/apielec/getData correctamente autenticado, la consulta que realiza a base de datos es la siguiente:
+It obtains all the data available in the database. So when a GET request is made to the address http://127.0.0.1:5000/apielec/getData correctly authenticated, the query to the database is as follows:
 
 ```sql
 SELECT * FROM elecprod.consumpdata;
 ```
 
-obteniendo la respuesta:
+getting the answer:
 
 ```json
 {
@@ -294,25 +296,25 @@ obteniendo la respuesta:
 
 ### /apielec/getDataById
 
-| Parámetros | Tipo   | Descripción                                                  |
+| Parameters | Type   | Description                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| id         | string | Especifica el Id asociado con el registro. Acepta varios identificadores separados por comas (ej: 1,2,3). |
+| id         | string | Specifies the Id associated with the record. Accepts multiple identifiers separated by commas (e.g. 1,2,3). |
 
-| Respuesta (código) | Descripción                                      |
-| ------------------ | ------------------------------------------------ |
-| 200                | OK                                               |
-| 400                | Invalid argument (argumento no válido)           |
-| 405                | Token is missing (token no encontrado)           |
-| 406                | Invalid token (token no válido)                  |
-| 500                | Mapping Key Error (error de clave de asignación) |
+| Response (code) | Description       |
+| --------------- | ----------------- |
+| 200             | OK                |
+| 400             | Invalid argument  |
+| 405             | Token is missing  |
+| 406             | Invalid token     |
+| 500             | Mapping Key Error |
 
-Obtiene todos los registros cuyo identificador o identificadores (separados por comas, ej: 1,2,3) encuentre en la tabla de referencia. Acepta que el parámetro vaya tanto en la cabecera de la petición como en el cuerpo en formato json. Al realizar una petición GET a la dirección http://127.0.0.1:5000/apielec/getDataById correctamente autenticado, la consulta que realiza a base de datos es la siguiente:
+Gets all records whose identifier(s) (separated by commas, e.g. 1,2,3) it finds in the reference table. Accepts the parameter to be both in the request header and in the body in json format. Making a GET request to the address http://127.0.0.1:5000/apielec/getDataById correctly authenticated, the query to the database is as follows:
 
 ```sql
 SELECT * FROM elecprod.consumpdata where id in ({id});
 ```
 
-Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataById?id=5,100, obtenemos:
+For example, for the request http://127.0.0.1:5000/apielec/getDataById?id=5,100, you obtain:
 
 ```json
 {
@@ -353,25 +355,25 @@ Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataById?id=5,10
 
 ### /apielec/getDataByDate
 
-| Parámetros | Tipo   | Descripción                                                  |
+| Parameters | Type   | Description                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| date       | string | Se buscará la fecha y la hora en el formato "AAAA-MM-DD HH: MM: SS". Acepta el signo "%" y el signo "_". |
+| date       | string | The date and time will be searched in the format "YYYYY-MM-DD HH:MM:SS". It accepts the "%" sign and the "_" sign. |
 
-| Respuesta (código) | Descripción                                      |
-| ------------------ | ------------------------------------------------ |
-| 200                | OK                                               |
-| 400                | Invalid argument (argumento no válido)           |
-| 405                | Token is missing (token no encontrado)           |
-| 406                | Invalid token (token no válido)                  |
-| 500                | Mapping Key Error (error de clave de asignación) |
+| Response (code) | Description       |
+| --------------- | ----------------- |
+| 200             | OK                |
+| 400             | Invalid argument  |
+| 405             | Token is missing  |
+| 406             | Invalid token     |
+| 500             | Mapping Key Error |
 
-Obtiene todos los registros cuyo fecha coincida con la solicitada que encuentre en la tabla de referencia. Acepta que el parámetro vaya tanto en la cabecera de la petición como en el cuerpo en formato json. Al realizar una petición GET a la dirección http://127.0.0.1:5000/apielec/getDataByDate correctamente autenticado, la consulta que realiza a base de datos es la siguiente:
+found in the reference table. It accepts that the parameter is both in the header of the request and in the body in json format. Making a GET request to the address http://127.0.0.1:5000/apielec/getDataByDate correctly authenticated, the query to the database is as follows:
 
 ```sql
 SELECT * FROM elecprod.consumpdata where date like '{date}');
 ```
 
-Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataById?id=5,100, obtenemos:
+For example, for the request http://127.0.0.1:5000/apielec/getDataByDate?date=2019-09-11_0_:00:00, you obtain:
 
 ```json
 {
@@ -413,26 +415,26 @@ Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataById?id=5,10
 
 ### /apielec/getDataByRange
 
-| Parámetros | Tipo   | Descripción                                                  |
+| Parameters | Type   | Description                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| date       | string | Fecha y hora iniciales en el formato 'YYYY-MM-DD HH:MM:SS' a buscar. Acepta el signo '%' y el signo '_'. |
-| end_date   | string | Fecha y hora finales en el formato 'YYYY-MM-DD HH:MM:SS' a buscar. Acepta el signo '%' y el signo '_'. |
+| date       | string | Initial date and time in the format 'YYYYY-MM-DD HH:MM:SS' to search for. Accepts the '%' sign and the '_' sign. |
+| end_date   | string | End date and time in the format 'YYYYY-MM-DD HH:MM:SS' to search for. Accepts the '%' sign and the '_' sign. |
 
-| Respuesta (código) | Descripción                                      |
-| ------------------ | ------------------------------------------------ |
-| 200                | OK                                               |
-| 400                | Invalid argument (argumento no válido)           |
-| 405                | Token is missing (token no encontrado)           |
-| 406                | Invalid token (token no válido)                  |
-| 500                | Mapping Key Error (error de clave de asignación) |
+| Response (code) | Description       |
+| --------------- | ----------------- |
+| 200             | OK                |
+| 400             | Invalid argument  |
+| 405             | Token is missing  |
+| 406             | Invalid token     |
+| 500             | Mapping Key Error |
 
-Obtiene todos los registros cuyo fecha coincida entre las dos fechas indicadas en la solicitud que encuentre en la tabla de referencia. Acepta que el parámetro vaya tanto en la cabecera de la petición como en el cuerpo en formato json. Al realizar una petición GET a la dirección http://127.0.0.1:5000/apielec/getDataByRange correctamente autenticado, la consulta que realiza a base de datos es la siguiente:
+Gets all records with a date between the two dates specified in the request that it finds in the reference table. It accepts that the parameter is both in the request header and in the body in json format. Making a GET request to the address http://127.0.0.1:5000/apielec/getDataByRange correctly authenticated, the query to the database is as follows:
 
 ```sql
 SELECT * FROM elecprod.consumpdata where date between '{date}' and '{end_date}');
 ```
 
-Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataByRange?date=2019-09-12_10:00:00&end_date=2019-09-12_10:30:00, obtenemos:
+For example, for the request http://127.0.0.1:5000/apielec/getDataByRange?date=2019-09-12_10:00:00&end_date=2019-09-12_10:30:00, you obtain:
 
 ```json
 {
@@ -485,18 +487,18 @@ Por ejemplo, para la petición http://127.0.0.1:5000/apielec/getDataByRange?date
 
 ## test.py
 
-Este script contiene 8 test unitarios que comprueban en orden que:
+This script includes 8 unit tests that check in order:
 
-1. Se puede acceder correctamente a la base de datos con el usuario de solo consultas.
-2. El usuario de solo consultas no puede insertar datos.
-3. La API devuelve un error al intentar acceder con credenciales incorrectas.
-4. Con las credenciales correctas la API devuelve un token válido.
-5. Se reciben datos correctos al llamar a /apielec/getData
-6. Se reciben datos correctos al llamar a /apielec/geById
-7. Se reciben datos correctos al llamar a /apielec/getDataByDate
-8. Se reciben datos correctos al llamar a /apielec/getDataByRange
+1. The database can be accessed correctly with the read-only user.
+2. The read-only user can not insert data.
+3. The API returns an error when trying to login with incorrect credentials.
+4. With the correct credentials the API returns a valid token.
+5. Correct data is received when calling /apielec/getData.
+6. Correct data is received when calling /apielec/geById.
+7. Correct data is received when calling /apielec/getDataByDate
+8. Correct data is received when calling /apielec/getDataByRange
 
-Para ejecutar el test:
+To run the test:
 
 ```powershell
 PS > python test.py
@@ -507,11 +509,11 @@ Ran 8 tests in 0.246s
 OK
 ```
 
-## Solución de problemas
+## Troubleshooting
 
-### PyJWT y Werkzeug
+### PyJWT and Werkzeug
 
-Si la API no permite generar tokens de forma correcta o le es imposible generarlo puede deberse a que la versión del paquete Werkzeug sea incompatible con la versión de PyJWT instalada. Para solucionarlo hay que intalar las versiones que se nombran en los requisitos, es decir, la 0.16.1 para Werkzeug y la 2.1.0 para PyJWT.
+If the API does not generate tokens correctly or it is impossible to generate them, it may be because the version of the Werkzeug package is incompatible with the version of PyJWT installed. To fix this, you have to install the versions listed in the requirements, i.e. 0.16.1 for Werkzeug and 2.1.0 for PyJWT.
 
 ```powershell
 PS > pip unistall werkzeug
