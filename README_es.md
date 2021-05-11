@@ -493,10 +493,10 @@ Este script contiene 8 test unitarios que comprueban en orden que:
 2. El usuario de solo consultas no puede insertar datos.
 3. La API devuelve un error al intentar acceder con credenciales incorrectas.
 4. Con las credenciales correctas la API devuelve un token válido.
-5. Se reciben datos correctos al llamar a /apielec/getData
-6. Se reciben datos correctos al llamar a /apielec/geById
-7. Se reciben datos correctos al llamar a /apielec/getDataByDate
-8. Se reciben datos correctos al llamar a /apielec/getDataByRange
+5. Se reciben datos correctos al llamar a /apielec/getData.
+6. Se reciben datos correctos al llamar a /apielec/geById.
+7. Se reciben datos correctos al llamar a /apielec/getDataByDate.
+8. Se reciben datos correctos al llamar a /apielec/getDataByRange.
 
 Para ejecutar el test:
 

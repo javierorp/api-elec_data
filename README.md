@@ -495,8 +495,8 @@ This script includes 8 unit tests that check in order:
 4. With the correct credentials the API returns a valid token.
 5. Correct data is received when calling /apielec/getData.
 6. Correct data is received when calling /apielec/geById.
-7. Correct data is received when calling /apielec/getDataByDate
-8. Correct data is received when calling /apielec/getDataByRange
+7. Correct data is received when calling /apielec/getDataByDate.
+8. Correct data is received when calling /apielec/getDataByRange.
 
 To run the test:
 
